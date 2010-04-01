@@ -1,0 +1,28 @@
+= em-powerdns
+
+Include EM::P::PowerDNS in a module or class to use it as a PowerDNS backend.
+
+== Example
+
+    module RedisBackend
+      include EM:::P::PowerDNS
+
+      def receive_query(query)
+        # make some logic here to resolve the DNS
+        ip = redis[query.qname]
+        data query.qname, query.qclass, :A, 3600, 1, ip
+      end
+
+      def redis
+        @redis ||= Redis.new
+      end
+    end
+
+    EM.run { EM.open_keyboard(RedisBackend) }
+
+PowerDNS uses stdin to send all it's queries so EM.open_keyboard does exactly
+what we need.
+
+== Copyright
+
+Copyright (c) 2010 Martin Emde. See LICENSE for details.
