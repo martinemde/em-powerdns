@@ -1,24 +1,32 @@
 = em-powerdns
 
+You can use this plus the unix program PowerDNS to make a custom DNS server
+with the lookup done by a ruby script you write.
+
+Even though the actual PowerDNS pipe backend is synchronous, using this will
+allow a script to start up other side tasks, logging or stats for example,
+without interrupting the scripts ability to serve more requests.
+
 Include EM::P::PowerDNS in a module or class to use it as a PowerDNS backend.
 
 == Example
 
-    module RedisBackend
-      include EM:::P::PowerDNS
+  module RedisBackend
+    include EM::P::PowerDNS
 
-      def receive_query(query)
-        # make some logic here to resolve the DNS
-        ip = redis[query.qname]
-        data query.qname, query.qclass, :A, 3600, 1, ip
-      end
-
-      def redis
-        @redis ||= Redis.new
-      end
+    def receive_query(query)
+      # make some logic here to resolve the DNS
+      ip = redis[query.qname]
+      data query.qname, query.qclass, :A, 3600, 1, ip
+      super
     end
 
-    EM.run { EM.open_keyboard(RedisBackend) }
+    def redis
+      @redis ||= Redis.new
+    end
+  end
+
+  EM.run { EM.open_keyboard(RedisBackend) }
 
 PowerDNS uses stdin to send all it's queries so EM.open_keyboard does exactly
 what we need.
