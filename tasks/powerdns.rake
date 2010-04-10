@@ -118,13 +118,13 @@ pipebackend-abi-version=2
 
     desc 'Install backend wrapper'
     task :backend => [:paths] do
-      executable = File.expand_path('../..', __FILE__)
+      gem_root = File.expand_path('../..', __FILE__)
       pipe = PDNS.pipe_command
       pipe.delete if pipe.exist?
       pipe.open('w') do |f|
         f.puts <<-SCRIPT
 #!/bin/bash
-cd #{executable}
+cd #{gem_root}
 bundle exec bin/backend
         SCRIPT
       end
